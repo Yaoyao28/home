@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>My AI Agent Could See the Answer Key — Yao Zhang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Matches the main site — adjust here if any value differs */
+    --cream:#FBF7EE;
+    --paper:#F4EEE1;      /* slightly deeper cream for code + callouts */
+    --navy:#1B2440;
+    --navy-soft:#46506E;
+    --gold:#C9A227;
+    --rule:#DFD5C2;
+    --display:'Playfair Display', Georgia, serif;
+    --body:'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono:'IBM Plex Mono', 'Consolas', monospace;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--navy);
+    font-family:var(--body);
+    font-size:19px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    border-bottom:1px solid var(--rule);
+    padding:22px 0;
+    margin-bottom:60px;
+  }
+  .masthead-inner{
+    max-width:760px;margin:0 auto;padding:0 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+  }
+  .wordmark{
+    font-family:var(--body);
+    font-size:12px;font-weight:600;
+    letter-spacing:.22em;text-transform:uppercase;
+    color:var(--navy);text-decoration:none;
+  }
+  .wordmark:hover{color:var(--gold)}
+  .back{
+    font-size:13px;letter-spacing:.06em;
+    color:var(--navy-soft);text-decoration:none;
+    border-bottom:1px solid transparent;
+  }
+  .back:hover{color:var(--gold);border-bottom-color:var(--gold)}
+
+  /* ---------- article shell ---------- */
+  article{max-width:760px;margin:0 auto;padding:0 24px 120px}
+
+  .eyebrow{
+    font-size:11px;font-weight:600;
+    letter-spacing:.2em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:20px;
+  }
+  h1{
+    font-family:var(--display);
+    font-size:clamp(2.1rem,5.5vw,3.15rem);
+    font-weight:700;line-height:1.14;
+    margin:0 0 24px;letter-spacing:-.01em;
+  }
+  .standfirst{
+    font-size:1.16rem;line-height:1.62;
+    color:var(--navy-soft);
+    margin:0 0 30px;
+  }
+  .byline{
+    font-size:13px;letter-spacing:.04em;color:var(--navy-soft);
+    padding-bottom:38px;border-bottom:1px solid var(--rule);
+    margin-bottom:46px;
+  }
+
+  h2{
+    font-family:var(--display);
+    font-size:1.68rem;font-weight:600;line-height:1.25;
+    margin:64px 0 20px;
+  }
+  h3{
+    font-family:var(--body);
+    font-size:1rem;font-weight:600;
+    letter-spacing:.03em;
+    margin:40px 0 12px;
+  }
+  p{margin:0 0 22px}
+  a{color:var(--navy);text-decoration:none;border-bottom:1px solid var(--gold)}
+  a:hover{color:var(--gold)}
+  strong{font-weight:600}
+  em{font-style:italic}
+
+  /* ---------- code ---------- */
+  pre{
+    background:var(--paper);
+    border-left:2px solid var(--gold);
+    padding:20px 22px;
+    margin:0 0 26px;
+    overflow-x:auto;
+    font-family:var(--mono);
+    font-size:13.5px;
+    line-height:1.62;
+    color:var(--navy);
+  }
+  code{
+    font-family:var(--mono);
+    font-size:.87em;
+    background:var(--paper);
+    padding:2px 5px;
+    color:var(--navy);
+  }
+  pre code{background:none;padding:0;font-size:inherit}
+
+  /* ---------- table ---------- */
+  .table-wrap{overflow-x:auto;margin:0 0 28px}
+  table{border-collapse:collapse;width:100%;font-size:15.5px}
+  th,td{
+    text-align:left;padding:11px 14px;
+    border-bottom:1px solid var(--rule);
+    vertical-align:top;
+  }
+  th{
+    font-size:11px;font-weight:600;
+    letter-spacing:.13em;text-transform:uppercase;
+    color:var(--navy-soft);
+    border-bottom:1px solid var(--navy);
+  }
+
+  /* ---------- pull quote ---------- */
+  .pull{
+    font-family:var(--display);
+    font-size:1.32rem;line-height:1.45;
+    color:var(--navy);
+    border-left:2px solid var(--gold);
+    padding:6px 0 6px 26px;
+    margin:38px 0;
+  }
+
+  /* ---------- checklist ---------- */
+  ol{padding-left:0;list-style:none;counter-reset:step;margin:0 0 26px}
+  ol li{
+    counter-increment:step;
+    position:relative;
+    padding-left:44px;
+    margin-bottom:16px;
+  }
+  ol li::before{
+    content:counter(step);
+    position:absolute;left:0;top:2px;
+    font-family:var(--mono);font-size:12px;
+    color:var(--gold);
+    border:1px solid var(--rule);
+    width:26px;height:26px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  hr{
+    border:0;height:1px;background:var(--rule);
+    margin:56px 0;
+  }
+
+  .endnote{
+    font-size:14.5px;line-height:1.6;
+    color:var(--navy-soft);
+    background:var(--paper);
+    padding:22px 24px;
+    margin-top:52px;
+  }
+
+  footer{
+    max-width:760px;margin:0 auto;padding:0 24px 80px;
+    border-top:1px solid var(--rule);
+  }
+  .footer-inner{padding-top:30px;font-size:14px;color:var(--navy-soft)}
+
+  @media (max-width:640px){
+    body{font-size:17.5px}
+    article{padding-bottom:80px}
+    h2{margin-top:48px}
+    pre{font-size:12.5px;padding:16px 18px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important}
+  }
+  a:focus-visible,.wordmark:focus-visible{
+    outline:2px solid var(--gold);outline-offset:3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="index.html">Yao&nbsp;Zhang</a>
+    <a class="back" href="index.html#writing">← Writing</a>
+  </div>
+</div>
+
+<article>
+
+  <div class="eyebrow">Notes on evaluation</div>
+
+  <h1>My AI Agent Could See the Answer Key</h1>
+
+  <p class="standfirst">I built an agentic pipeline for population
+  pharmacokinetic model selection. It worked. Then I tried to measure how
+  reliable it was, and found it had been reading the correct answers the
+  entire time.</p>
+
+  <div class="byline">Yao Zhang</div>
+
+  <p>The pipeline runs four tasks end to end: fit a one-compartment model,
+  fit a two-compartment model, compare them, and stop at a human review gate
+  before the decision is final. Each task runs in a fresh LLM instance with
+  no memory of the others; state moves between them through files. It picked
+  the right structural model. The parameter estimates looked reasonable.</p>
+
+  <p>Here is how the leak happened, how I found it, what the clean re-run
+  showed, and why I think it is the most useful thing I learned building
+  this.</p>
+
+  <h2>The setup</h2>
+
+  <p>The pipeline analyzes a synthetic clinical trial dataset — an
+  ADaM-format pharmacokinetic study for a fictional monoclonal antibody.
+  Because the data were <em>simulated</em>, the true parameter values are
+  known:</p>
+
+<pre><code>CL = 0.25 L/day     V1 = 3.5 L      Q  = 0.4 L/day
+V2 = 2.8 L          ka = 0.3 /day   F  = 0.70</code></pre>
+
+  <p>That is what makes the scenario useful. With real patient data you fit
+  a model, get a clearance of 0.24 L/day, and have no way to know whether it
+  is right — there is no answer key. With simulated data there is one, so
+  you can measure not just whether the model <em>fits</em>, but whether it
+  is <em>correct</em>.</p>
+
+  <p>That distinction matters more than it sounds:</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Without ground truth</th><th>With ground truth</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>“AIC prefers the two-compartment model”</td>
+        <td>“The model recovers clearance to within 3.9% of truth”</td>
+      </tr>
+      <tr>
+        <td>A claim about <strong>fit</strong></td>
+        <td>A claim about <strong>correctness</strong></td>
+      </tr>
+      <tr>
+        <td>Circular — the model is judged by a statistic computed from its own fit</td>
+        <td>External — measured against something the model never saw</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>So I wrote a small evaluation layer: one file holding the true values,
+  one script scoring parameter recovery, one scoring model selection. I ran
+  it against the completed pipeline output and got a clean table.</p>
+
+  <p>And then, mostly out of ordinary caution, I asked a question I had not
+  actually asked before: <strong>which file holds the truth?</strong></p>
+
+  <h2>The question that found it</h2>
+
+  <p>I knew the answer was “the ground truth file I just wrote.” But the
+  question kept going. If the truth lives in a file, and my agent reads
+  files, then what exactly does my agent read?</p>
+
+  <p>The orchestrator assembles each agent prompt from four sources:</p>
+
+<pre><code>protocol.md          universal workflow rules
+study_context.md     facts about this study
+progress.md          findings from completed tasks
+tasks.json           the current task definition
+        ↓
+    the prompt the agent actually receives</code></pre>
+
+  <p>I opened <code>study_context.md</code>. There, under a heading I had
+  written myself:</p>
+
+<pre><code>## Ground-Truth Parameters (for post-hoc evaluation only —
+## NOT visible to modeling tasks)
+
+| TVCL | 0.25 L/day |
+| TVV1 | 3.5 L      |
+| TVQ  | 0.4 L/day  |
+...</code></pre>
+
+  <p>And higher up, in the molecule description:</p>
+
+<pre><code>- Ground truth is 2-compartment — the structural comparison task
+  should still confirm this from the data rather than assume it</code></pre>
+
+  <p>That file is embedded into <strong>every agent prompt</strong>. The
+  agent was told which structural model was correct, given the exact
+  parameter values, and then asked to determine the structural model and
+  estimate those parameters.</p>
+
+  <p class="pull">The answer key was inside the exam.</p>
+
+  <h2>Why the label did not help</h2>
+
+  <p>The heading says <em>“NOT visible to modeling tasks.”</em> I wrote
+  that myself, believing it meant something.</p>
+
+  <p>It is a comment in a text file. It has no enforcement. The whole file
+  is concatenated into the prompt and handed to the model, which reads all
+  of it. Writing “please do not look at this” on a document you hand
+  someone is not access control.</p>
+
+  <p>This is obvious once stated. It was not obvious while I was writing it,
+  because I knew what I <em>intended</em> the section to be, and the label
+  described my intent accurately. The gap was between intent and
+  mechanism.</p>
+
+  <h2>Why it invalidates the measurement</h2>
+
+  <p>The evaluation rests on a specific inference: <em>the agent estimated
+  clearance at 0.240 from the data, so the 3.9% gap from truth tells us
+  something about how well the pipeline recovers parameters.</em></p>
+
+  <p>If the agent could read <code>TVCL = 0.25</code>, that inference
+  collapses. I can no longer distinguish between:</p>
+
+<pre><code>"the data support CL ≈ 0.24"            ← what I wanted to measure
+"the agent aimed near the 0.25 it saw"   ← contamination I cannot rule out</code></pre>
+
+  <p>Note the shape of that second line. I am not claiming the agent
+  <em>did</em> use the leaked values. I have no evidence that it did, and
+  the fit was performed by R code running a 486-start grid search, not by a
+  model choosing numbers it liked.</p>
+
+  <p>But that defense does not work, and it is worth being precise about
+  why.</p>
+
+  <p class="pull">In evaluation, the possibility alone invalidates the
+  claim.</p>
+
+  <p>This is the same discipline as train/test leakage in supervised
+  learning: if a feature <em>could</em> encode the outcome, “the model
+  probably ignored it” is not an acceptable answer. You do not get to argue
+  about how contaminated a contaminated measurement was. You re-run it
+  clean.</p>
+
+  <h2>The part that actually worried me</h2>
+
+  <p>Losing one set of numbers is annoying. The real problem was what came
+  next.</p>
+
+  <p>The next step in this project is an ablation study — the experiment
+  the whole thing is building toward. Three configurations:</p>
+
+<pre><code>Arm A   naive single agent, one long prompt, no task structure,
+        no embedded domain rules, no verification criteria
+Arm B   the structured pipeline
+Arm C   Arm B plus deterministic validators</code></pre>
+
+  <p>Run each several times, score every run against ground truth, and
+  measure what the structure actually contributes.</p>
+
+  <p>Now consider running that experiment with the leak still in place:</p>
+
+<pre><code>Arm A (naive, sees truth)       →  probably also picks 2-compartment
+Arm B (structured, sees truth)  →  picks 2-compartment
+Difference: none</code></pre>
+
+  <p>I would have concluded that context engineering does not matter. I
+  would have had a clean-looking table supporting that conclusion. And the
+  actual explanation would have been that I handed both arms the answer and
+  measured nothing at all.</p>
+
+  <p>That is what separates this from the other six bugs in my engineering
+  log. Those were things breaking — a Unicode decode error, a Windows
+  command-line length limit, an agent reporting “complete” without
+  persisting the state. Breakage announces itself. You get a stack trace and
+  you go fix it.</p>
+
+  <p>This would not have crashed anything. It would have quietly produced a
+  wrong conclusion that I had no particular reason to doubt.</p>
+
+  <h2>Fixing it properly</h2>
+
+  <p>The obvious fix is to delete the parameter table from
+  <code>study_context.md</code>, which I did. I also removed the line
+  stating the correct structural model — arguably worse than the numbers,
+  because my headline result was “all three criteria correctly selected
+  two-compartment,” and an agent told the answer in advance is not evidence
+  that a pipeline can find it.</p>
+
+  <p>Then I verified the fix at the point that matters. Not by re-reading
+  the file I had edited, but by generating the assembled prompt and
+  searching <em>that</em>:</p>
+
+<pre><code>findstr /C:"0.25" workspace\structural_model_review\prompt.txt
+findstr /C:"TVCL" workspace\structural_model_review\prompt.txt
+findstr /C:"Ground truth is 2-compartment" workspace\...\prompt.txt</code></pre>
+
+  <p>All three returned nothing. Checking the assembled prompt rather than
+  the source files tests what the agent <em>receives</em>, not what I
+  <em>intended to send</em> — the same distinction that caused the problem
+  in the first place.</p>
+
+  <p>But a gap remained. The orchestrator invokes the agent with
+  <code>--add-dir</code> pointed at the project root and permissions
+  skipped, so the agent has read access to every file in the project.
+  Moving the truth into <code>evaluation/ground_truth.py</code> took it out
+  of the prompt, but not out of the filesystem.</p>
+
+  <p>Is the agent likely to browse into an <code>evaluation/</code> folder
+  while fitting a PK model? No. Its task rules point it at specific files,
+  and it has no reason to wander.</p>
+
+  <p>But “unlikely” is not “impossible,” and I had just spent an afternoon
+  learning that a safeguard which depends on the agent choosing not to look
+  is not a safeguard. So I moved the entire evaluation layer outside the
+  project directory:</p>
+
+<pre><code>C:\Projects\
+├── PMX agent project\     ← the agent's --add-dir scope
+└── pmx-evaluation\        ← outside it entirely</code></pre>
+
+  <p>The dependency now runs one direction only: evaluation reads the
+  project; the project cannot reach evaluation.</p>
+
+  <p>The difference is not cosmetic. <em>“The answer key was outside the
+  agent's filesystem scope”</em> is a claim I can demonstrate. <em>“The
+  agent probably did not read it”</em> is a claim I would have to defend, to
+  someone with no reason to take my word for it.</p>
+
+  <h2>A second leak vector</h2>
+
+  <p>While preparing the clean re-run, I found the same mistake in a second
+  file.</p>
+
+  <p><code>progress.md</code> is an append-only log where each completed
+  task records its findings, and it is fed into every subsequent prompt.
+  That is the design — it is how state moves between agent instances that
+  share no memory.</p>
+
+  <p>When I regenerated the assembled prompt after cleaning the study
+  context and searched it again, the search lit up: the integration task's
+  entry in the progress log carried the full ground-truth parameter table,
+  wearing the same label — <em>“for post-hoc evaluation only — NOT visible
+  to modeling tasks”</em> — while sitting inside the prompt delivered to
+  the modeling tasks. The same mistake, in a second file, behind the same
+  label.</p>
+
+  <p>It also means a re-run inherits the previous run's conclusions. Entries
+  from the contaminated run say things like <em>“2-compartment preferred,
+  ΔAIC −33.81.”</em> A fresh run reading that log does not have to reach
+  that conclusion independently. It can just agree. So the clean re-run
+  needed a reset progress log, not just a cleaned study context.</p>
+
+  <p>The generalization: <strong>leakage can enter through accumulated
+  state, not only through static configuration.</strong> The static file was
+  the one I thought to audit. The log that grows during execution was not —
+  precisely because I thought of it as output rather than input, when in
+  fact it is both.</p>
+
+  <h2>What the clean re-run showed</h2>
+
+  <p>With both leak paths closed — the truth removed from the study
+  context, the progress log reset to its uncontaminated entries — I re-ran
+  the full chain and scored it with the same evaluation scripts.</p>
+
+  <p>The parameter estimates came back identical to the contaminated run.
+  Not close — identical, to four decimal places, on all six parameters:</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Parameter</th><th>Leaked run</th><th>Clean run</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CL</td><td>0.2402</td><td>0.2402</td></tr>
+      <tr><td>V1</td><td>3.5102</td><td>3.5102</td></tr>
+      <tr><td>Q</td><td>0.2462</td><td>0.2462</td></tr>
+      <tr><td>V2</td><td>3.1073</td><td>3.1073</td></tr>
+      <tr><td>KA</td><td>0.4366</td><td>0.4366</td></tr>
+      <tr><td>F_SC</td><td>0.4878</td><td>0.4878</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Model selection came back the same too: three of three criteria
+  preferring the two-compartment model, with the same AIC, BIC, and OFV
+  values.</p>
+
+  <p>So the leak, as far as I can tell, changed nothing. The estimates were
+  determined by the data and a deterministic grid search, not by the
+  visible answer key. The contaminated numbers turn out to have been
+  trustworthy.</p>
+
+  <p class="pull">Before the re-run, “the leak probably didn't matter” was
+  a hope. After it, it is a measurement.</p>
+
+  <p>Which might sound like the re-run was wasted effort. It was the
+  opposite. The value of the clean run was never that the numbers would
+  change — it was that whether they would change was unknowable in advance.
+  The honest caveat: with one run per condition, this is observed
+  reproducibility, not proof of it. The agent could have written a
+  different fitting script the second time, and happened not to.</p>
+
+  <p>One thing did change: the reasoning. In the contaminated run, the
+  review stage built its strongest counter-argument by splitting the
+  evidence by study — showing that within the target population's own
+  data, BIC actually favored the simpler model. In the clean run, that
+  analysis never appeared. In its place the agent built different ones: a
+  per-observation tally showing only 52% of observations individually
+  improve under the selected model, a subcutaneous-bin split in which five
+  of eight bins favor the rejected model, an information criterion
+  recomputed at the number of subjects rather than the number of
+  observations.</p>
+
+  <p>Deterministic output reproduced exactly. The model's choice of
+  analyses did not — same skeptical posture, different arguments each
+  time. That is a useful map of where the variance actually lives in a
+  pipeline like this. And it answers a question the contaminated run could
+  not: the agent's habit of arguing against its own conclusion survived
+  the removal of the answer key, which means the skepticism was driven by
+  the data, not by knowing where the answer was supposed to land.</p>
+
+  <p>The human review gate fired at the end of the clean run, as designed,
+  and the decision was signed off with conditions binding the downstream
+  stages.</p>
+
+  <h2>The checklist I now use</h2>
+
+  <p>Before trusting any benchmark result:</p>
+
+  <ol>
+    <li><strong>Where does the truth live?</strong> Only in files the
+    scoring code reads — ideally outside the tested system's filesystem
+    scope, not merely in a different file.</li>
+    <li><strong>What does the system actually receive?</strong> Inspect the
+    assembled input, not the source files you intended to pass.</li>
+    <li><strong>Could the answer leak indirectly?</strong> A structural hint
+    leaks as surely as a numeric table.</li>
+    <li><strong>Is a label doing work that only code should do?</strong></li>
+    <li><strong>Does accumulated state carry the answer forward?</strong>
+    Logs, caches, and memory files that grow across runs are input, whatever
+    you call them.</li>
+    <li><strong>Is n large enough to report a rate?</strong> Four of six
+    confidence intervals covering truth, from one run, is a signal — not a
+    coverage estimate.</li>
+    <li><strong>Does the metric measure fit or correctness?</strong> Fit
+    statistics are internal and circular. Ground-truth error is
+    external.</li>
+  </ol>
+
+  <h2>Why I think this is worth writing down</h2>
+
+  <p>There is a lot of enthusiasm right now about building agentic systems,
+  and comparatively little about evaluating them. The demos are impressive.
+  The question of whether the thing is <em>reliable</em> tends to arrive
+  later, if at all.</p>
+
+  <p>I care about this specifically because I work in a regulated field.
+  Pharmaceutical companies are not short of people who want to use large
+  language models. They are short of people who can demonstrate that the
+  output is trustworthy enough to put in front of a regulator. That
+  demonstration is an evaluation problem, and evaluation problems fail
+  quietly.</p>
+
+  <p>The bug that crashes your pipeline is the cheap kind. You find it
+  immediately and you fix it. The expensive kind lets your experiment run to
+  completion, produce a plausible number, and support a conclusion that is
+  wrong — with nothing in the output indicating that anything went
+  wrong.</p>
+
+  <p>I found this one by asking which file held the truth. Not a
+  sophisticated question. It just happened to be one I had not asked
+  before.</p>
+
+  <div class="endnote">
+    <strong>A note on the numbers.</strong> The recovery results above were
+    first produced in runs where the leak was present. After the fix, the
+    full chain was re-run with the truth withheld; the estimates reproduced
+    exactly and are reported unchanged. The ablation study the fix was
+    necessary for is in progress.
+  </div>
+
+</article>
+
+<footer>
+  <div class="footer-inner">
+    <a href="index.html">← Back to home</a>
+  </div>
+</footer>
+
+</body>
+</html>
